@@ -3,7 +3,7 @@ pub mod Maze;
 #[cfg(test)]
 mod MazeTests {
 
-    use super::Maze::{Cell, Grid, Row};
+    use crate::Maze::{Cell::Cell, Grid::Grid, Row::Row};
 
     const cases: [[usize; 2]; 6] = [[0, 0], [10, 10], [50, 10], [10, 50], [50, 0], [10, 50]];
 

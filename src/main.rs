@@ -1,4 +1,4 @@
-use MazeGenerator::Maze::{Cell, Grid, Row};
+use MazeGenerator::Maze::{Cell::Cell, Grid::Grid, Row::Row};
 
 fn main() {
     let test = Cell::new(50, 50);
