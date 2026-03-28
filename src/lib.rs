@@ -1,5 +1,12 @@
 pub mod Maze;
 
+pub enum directions {
+    left,
+    right,
+    up,
+    down,
+}
+
 #[cfg(test)]
 mod MazeTests {
 
@@ -34,7 +41,7 @@ mod MazeTests {
             let cell = Cell::new(case[0], case[1]);
 
             assert_eq!(cell.position, case);
-            assert_eq!(cell.walls, [0; 3]);
+            assert_eq!(cell.walls, [true; 3]);
         }
     }
 
