@@ -1,5 +1,4 @@
 use crate::Maze::Grid::Grid;
-use std::fs;
 
 pub fn grid_draw(grid: &Grid) -> String {
     let mut svg = String::new();

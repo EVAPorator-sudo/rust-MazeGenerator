@@ -1,7 +1,7 @@
 use MazeGenerator::{
     Draw::grid_draw,
     Generator::Ellers,
-    Maze::{Cell::Cell, Grid::Grid, Row::Row},
+    Maze::Grid::Grid,
 };
 
 fn main() {
