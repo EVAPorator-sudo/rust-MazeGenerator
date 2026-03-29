@@ -18,8 +18,9 @@ mod draw_test {
     use crate::{Draw::grid_draw, Generator::Ellers, Maze::Grid::Grid};
     use std::fs;
 
+    #[test]
     fn no_path() {
-        let grid = Ellers(Grid::new(50, 50));
+        let grid = Ellers(Grid::new(1000, 1000));
         let svg = grid_draw(&grid);
         fs::write("maze_image.svg", svg).expect("failed to write SVG");
     }
