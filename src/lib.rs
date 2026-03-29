@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(nonstandard_style)]
 
+pub mod Generator;
 pub mod Maze;
 
 pub enum directions {
@@ -12,7 +13,22 @@ pub enum directions {
 }
 
 #[cfg(test)]
-mod MazeTests {
+mod algorithm_tests {
+    const CASES: [[usize; 2]; 6] = [[0, 0], [10, 10], [50, 10], [10, 50], [50, 0], [10, 50]];
+
+    use crate::Generator::Ellers;
+    use crate::Maze::Grid::Grid;
+
+    #[test]
+    fn eller_test() {
+        for case in CASES {
+            Ellers(Grid::new(case[0], case[1]));
+        }
+    }
+}
+
+#[cfg(test)]
+mod maze_tests {
 
     use crate::Maze::{Cell::Cell, Grid::Grid, Row::Row};
 

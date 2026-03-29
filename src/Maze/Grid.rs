@@ -26,7 +26,7 @@ impl Grid {
         }
     }
 
-    fn get_cell(&self, coords: [usize; 2]) -> &Cell {
+    pub fn get_cell(&self, coords: [usize; 2]) -> &Cell {
         self.row_list
             .get(coords[1])
             .unwrap()
