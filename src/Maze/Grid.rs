@@ -1,4 +1,3 @@
-use std::num::ParseFloatError;
 
 use crate::{Maze::Cell::Cell, directions};
 

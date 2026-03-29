@@ -29,7 +29,7 @@ pub fn Ellers(mut grid: Grid) -> Grid {
         }
 
         for working_set in sets {
-            let mut carves;
+            let carves;
             if working_set.len() < 2 {
                 carves = 1;
             } else {
