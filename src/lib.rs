@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(nonstandard_style)]
 
+pub mod Draw;
 pub mod Generator;
 pub mod Maze;
 
@@ -10,6 +11,18 @@ pub enum directions {
     right,
     up,
     down,
+}
+
+#[cfg(test)]
+mod draw_test {
+    use crate::{Draw::grid_draw, Generator::Ellers, Maze::Grid::Grid};
+    use std::fs;
+
+    fn no_path() {
+        let grid = Ellers(Grid::new(50, 50));
+        let svg = grid_draw(&grid);
+        fs::write("maze_image.svg", svg).expect("failed to write SVG");
+    }
 }
 
 #[cfg(test)]
