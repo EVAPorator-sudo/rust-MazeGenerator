@@ -52,7 +52,7 @@ impl Grid {
             }
 
             right => {
-                self.get_mut_cell(coords).walls[2] = true;
+                self.get_mut_cell(coords).walls[2] = false;
                 self.get_mut_cell([coords[0] + 1, coords[1]]).walls[0] = false;
             }
 
@@ -73,7 +73,7 @@ impl Grid {
     ) -> Vec<directions> {
         let mut neighbours: Vec<directions> = Vec::new();
 
-        if coords[0] > 1 {
+        if coords[0] > 0 {
             if !visited.contains(&[coords[0] - 1, coords[1]]) {
                 neighbours.push(left);
             }
@@ -83,7 +83,7 @@ impl Grid {
                 neighbours.push(right);
             }
         }
-        if coords[1] > 1 {
+        if coords[1] > 0 {
             if !visited.contains(&[coords[0], coords[1] - 1]) {
                 neighbours.push(up);
             }

@@ -28,7 +28,7 @@ mod draw_test {
         let svg = grid_draw(&grid);
         fs::write("maze_image_e.svg", svg).expect("failed to write SVG");
 
-        let grid = Growing_Tree(Grid::new(500, 500), 0.5);
+        let grid = Growing_Tree(Grid::new(10000, 10000), 0.5);
         let svg = grid_draw(&grid);
         fs::write("maze_image_gt.svg", svg).expect("failed to write SVG");
     }

@@ -80,15 +80,15 @@ pub fn Growing_Tree(mut grid: Grid, weighting: f32) -> Grid {
     let mut visited: HashSet<[usize; 2]> = HashSet::new();
 
     active_list.push([
-        rng.random_range(0..(grid.width - 1)),
-        rng.random_range(0..(grid.height - 1)),
+        rng.random_range(0..(grid.width)),
+        rng.random_range(0..(grid.height)),
     ]);
 
     while !active_list.is_empty() {
         let active_cell: &[usize; 2];
         if rng.random_range(0.00..1.00) < weighting && active_list.len() > 1 {
             active_cell = active_list
-                .get(rng.random_range(0..(active_list.len() -1)))
+                .get(rng.random_range(0..(active_list.len() - 1)))
                 .unwrap();
         } else {
             active_cell = active_list.get(active_list.len() - 1).unwrap();
@@ -108,7 +108,7 @@ pub fn Growing_Tree(mut grid: Grid, weighting: f32) -> Grid {
                 visited.insert(neighbour);
             }
         } else {
-            let direction = &neighbours[rng.random_range(0..(neighbours.len() -1))];
+            let direction = &neighbours[rng.random_range(0..(neighbours.len() - 1))];
             grid.Merge(*active_cell, direction);
             let neighbour = direction_find(active_cell, direction);
             if !visited.contains(&neighbour) {
