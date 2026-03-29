@@ -15,14 +15,22 @@ pub enum directions {
 
 #[cfg(test)]
 mod draw_test {
-    use crate::{Draw::grid_draw, Generator::Ellers, Maze::Grid::Grid};
+    use crate::{
+        Draw::grid_draw,
+        Generator::{Ellers, Growing_Tree},
+        Maze::Grid::Grid,
+    };
     use std::fs;
 
     #[test]
     fn no_path() {
-        let grid = Ellers(Grid::new(1000, 1000));
+        let grid = Ellers(Grid::new(500, 500));
         let svg = grid_draw(&grid);
-        fs::write("maze_image.svg", svg).expect("failed to write SVG");
+        fs::write("maze_image_e.svg", svg).expect("failed to write SVG");
+
+        let grid = Growing_Tree(Grid::new(500, 500), 0.5);
+        let svg = grid_draw(&grid);
+        fs::write("maze_image_gt.svg", svg).expect("failed to write SVG");
     }
 }
 
@@ -30,13 +38,20 @@ mod draw_test {
 mod algorithm_tests {
     const CASES: [[usize; 2]; 6] = [[0, 0], [10, 10], [50, 10], [10, 50], [50, 0], [10, 50]];
 
-    use crate::Generator::Ellers;
+    use crate::Generator::{Ellers, Growing_Tree};
     use crate::Maze::Grid::Grid;
 
     #[test]
     fn eller_test() {
         for case in CASES {
             Ellers(Grid::new(case[0], case[1]));
+        }
+    }
+
+    #[test]
+    fn growing_tree_test() {
+        for case in CASES {
+            Growing_Tree(Grid::new(case[0], case[1]), 0.5);
         }
     }
 }
@@ -116,9 +131,9 @@ mod maze_tests {
     #[test]
     fn merge_test() {
         let mut grid = Grid::new(10, 10);
-        grid.Merge([5, 5], crate::directions::left);
-        grid.Merge([5, 5], crate::directions::right);
-        grid.Merge([5, 5], crate::directions::up);
-        grid.Merge([5, 5], crate::directions::down);
+        grid.Merge([5, 5], &crate::directions::left);
+        grid.Merge([5, 5], &crate::directions::right);
+        grid.Merge([5, 5], &crate::directions::up);
+        grid.Merge([5, 5], &crate::directions::down);
     }
 }

@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 
 use crate::{Maze::Cell::Cell, directions};
 
@@ -43,7 +44,7 @@ impl Grid {
             .unwrap()
     }
 
-    pub fn Merge(&mut self, coords: [usize; 2], direction: directions) {
+    pub fn Merge(&mut self, coords: [usize; 2], direction: &directions) {
         match direction {
             left => {
                 self.get_mut_cell(coords).walls[0] = false;
@@ -63,5 +64,35 @@ impl Grid {
                 self.get_mut_cell([coords[0], coords[1] - 1]).walls[1] = false;
             }
         }
+    }
+
+    pub fn find_neighbours(
+        &self,
+        coords: &[usize; 2],
+        visited: &HashSet<[usize; 2]>,
+    ) -> Vec<directions> {
+        let mut neighbours: Vec<directions> = Vec::new();
+
+        if coords[0] > 1 {
+            if !visited.contains(&[coords[0] - 1, coords[1]]) {
+                neighbours.push(left);
+            }
+        }
+        if coords[0] < self.width - 1 {
+            if !visited.contains(&[coords[0] + 1, coords[1]]) {
+                neighbours.push(right);
+            }
+        }
+        if coords[1] > 1 {
+            if !visited.contains(&[coords[0], coords[1] - 1]) {
+                neighbours.push(up);
+            }
+        }
+        if coords[1] < self.height - 1 {
+            if !visited.contains(&[coords[0], coords[1] + 1]) {
+                neighbours.push(down);
+            }
+        }
+        neighbours
     }
 }
