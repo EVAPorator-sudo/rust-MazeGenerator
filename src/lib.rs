@@ -82,4 +82,13 @@ mod MazeTests {
             }
         }
     }
+
+    #[test]
+    fn merge_test() {
+        let mut grid = Grid::new(10, 10);
+        grid.Merge([5, 5], crate::directions::left);
+        grid.Merge([5, 5], crate::directions::right);
+        grid.Merge([5, 5], crate::directions::up);
+        grid.Merge([5, 5], crate::directions::down);
+    }
 }

@@ -1,3 +1,5 @@
+use std::num::ParseFloatError;
+
 use crate::{Maze::Cell::Cell, directions};
 
 use super::Row::*;
@@ -24,30 +26,42 @@ impl Grid {
         }
     }
 
-    pub fn Merge(&mut self, cell: &mut Cell, direction: directions) {
+    fn get_cell(&self, coords: [usize; 2]) -> &Cell {
+        self.row_list
+            .get(coords[1])
+            .unwrap()
+            .cell_list
+            .get(coords[0])
+            .unwrap()
+    }
+
+    fn get_mut_cell(&mut self, coords: [usize; 2]) -> &mut Cell {
+        self.row_list
+            .get_mut(coords[1])
+            .unwrap()
+            .cell_list
+            .get_mut(coords[0])
+            .unwrap()
+    }
+
+    pub fn Merge(&mut self, coords: [usize; 2], direction: directions) {
         match direction {
             left => {
-                cell.walls[0] = false;
-                let row = self.row_list.get_mut(cell.position[1]).unwrap();
-                let adjacent_cell = row.cell_list.get_mut(cell.position[0] - 1).unwrap();
-                adjacent_cell.walls[2] = false;
+                self.get_mut_cell(coords).walls[0] = false;
+                self.get_mut_cell([coords[0] - 1, coords[1]]).walls[2] = false;
             }
 
             right => {
-                cell.walls[2] = false;
-                let row = self.row_list.get_mut(cell.position[1]).unwrap();
-                let adjacent_cell = row.cell_list.get_mut(cell.position[0] + 1).unwrap();
-                adjacent_cell.walls[0] = false;
+                self.get_mut_cell(coords).walls[2] = true;
+                self.get_mut_cell([coords[0] + 1, coords[1]]).walls[0] = false;
             }
 
             down => {
-                cell.walls[1] = false;
+                self.get_mut_cell(coords).walls[1] = false;
             }
 
             up => {
-                let row = self.row_list.get_mut(cell.position[1] - 1).unwrap();
-                let adjacent_cell = row.cell_list.get_mut(cell.position[0]).unwrap();
-                adjacent_cell.walls[1] = false;
+                self.get_mut_cell([coords[0], coords[1] - 1]).walls[1] = false;
             }
         }
     }
