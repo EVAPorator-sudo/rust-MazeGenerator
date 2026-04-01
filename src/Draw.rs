@@ -1,6 +1,14 @@
+use image::{ImageBuffer, Luma, Rgb};
+
 use crate::Maze::Grid::Grid;
 
-pub fn grid_draw(grid: &Grid) -> String {
+pub enum img_format {
+    svg,
+    png,
+    jpeg,
+}
+
+pub fn grid_draw_svg(grid: &Grid) -> String {
     let mut svg = String::new();
 
     let cell_size = 20;
@@ -85,5 +93,78 @@ pub fn grid_draw(grid: &Grid) -> String {
 
     svg.push_str("</svg>");
 
-    return svg;
+    svg
+}
+
+pub fn grid_draw_img(grid: &Grid) -> ImageBuffer<Luma<u8>, Vec<u8>> {
+    let cell_size = 20;
+    let wall_thickness = 1;
+    let cols = grid.width as u32;
+    let rows = grid.height as u32;
+
+    let image_width = cols * cell_size + 2 * wall_thickness;
+    let image_height = rows * cell_size + 2 * wall_thickness;
+
+    let white = Luma([255]);
+    let black = Luma([0]);
+
+    let mut img = ImageBuffer::from_pixel(image_width, image_height, white);
+
+    let draw_rect = |img: &mut ImageBuffer<Luma<u8>, Vec<u8>>, x: u32, y: u32, w: u32, h: u32| {
+        for px in x..(x + w).min(image_width) {
+            for py in y..(y + h).min(image_height) {
+                img.put_pixel(px, py, black);
+            }
+        }
+    };
+    draw_rect(&mut img, 0, 0, image_width, wall_thickness);
+    draw_rect(&mut img, 0, 0, wall_thickness, image_height);
+    draw_rect(
+        &mut img,
+        0,
+        image_height - wall_thickness,
+        image_width,
+        wall_thickness,
+    );
+    draw_rect(
+        &mut img,
+        image_width - wall_thickness,
+        0,
+        wall_thickness,
+        image_height,
+    );
+
+    for row in grid.row_list.iter() {
+        for cell in row.cell_list.iter() {
+            let position = &cell.position;
+            let walls = &cell.walls;
+
+            let x = wall_thickness + position[0] as u32 * cell_size;
+            let y = wall_thickness + position[1] as u32 * cell_size;
+
+            if walls[0] {
+                draw_rect(&mut img, x, y, wall_thickness, cell_size + wall_thickness)
+            }
+            if walls[1] {
+                draw_rect(
+                    &mut img,
+                    x,
+                    y + cell_size,
+                    cell_size + wall_thickness,
+                    wall_thickness,
+                )
+            }
+            if walls[2] {
+                draw_rect(
+                    &mut img,
+                    x + cell_size,
+                    y,
+                    wall_thickness,
+                    cell_size + wall_thickness,
+                )
+            }
+        }
+    }
+
+    img
 }

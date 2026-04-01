@@ -1,4 +1,4 @@
-use MazeGenerator::{Draw::grid_draw, Generator::*, Maze::Grid::Grid};
+use MazeGenerator::{Draw::*, Generator::*, Maze::Grid::Grid};
 use core::panic;
 use std::{env, fs};
 
@@ -32,5 +32,16 @@ fn main() {
         }
         _ => panic!("invalid algorithm"),
     };
-    fs::write(args.last().unwrap(), grid_draw(&grid)).expect("error generating maze");
+
+    let path = args.last().unwrap();
+
+    if path.contains(".svg") {
+        fs::write(args.last().unwrap(), grid_draw_svg(&grid)).expect("error writing maze to disk");
+    } else if path.contains(".png") || path.contains(".jpg") {
+        grid_draw_img(&grid)
+            .save(path)
+            .expect("error writing maze to disk");
+    } else {
+        panic!("invalid file extension");
+    }
 }
