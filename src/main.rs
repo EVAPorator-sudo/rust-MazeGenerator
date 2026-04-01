@@ -1,6 +1,6 @@
 use MazeGenerator::{Draw::*, Generator::*, Maze::Grid::Grid};
 use core::panic;
-use std::{env, fs, io::stdin, result};
+use std::{env, fs, io::stdin};
 
 fn main() {
     let mut args: Vec<String> = env::args().collect();

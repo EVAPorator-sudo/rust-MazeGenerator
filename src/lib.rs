@@ -5,6 +5,7 @@
 pub mod Draw;
 pub mod Generator;
 pub mod Maze;
+pub mod Solver;
 
 pub enum directions {
     left,
@@ -22,15 +23,32 @@ mod draw_test {
     };
     use std::fs;
 
+    const CASES: [[usize; 2]; 6] = [
+        [0, 0],
+        [10, 10],
+        [100, 100],
+        [1000, 1000],
+        [1000, 10],
+        [10, 1000],
+    ];
+
     #[test]
     fn no_path() {
-        let grid = Ellers(Grid::new(500, 500));
-        let svg = grid_draw_svg(&grid);
-        fs::write("maze_image_e.svg", svg).expect("failed to write SVG");
+        for case in CASES {
+            let grid = Ellers(Grid::new(case[0], case[1]));
+            let img = grid_draw_img(&grid);
+            let svg = grid_draw_svg(&grid);
+            img.save("maze_image_e.png").expect("failed to write png");
+            img.save("maze_image_e.jpg").expect("failed to write jpg");
+            fs::write("maze_image_e.svg", svg).expect("failed to write SVG");
 
-        let grid = Growing_Tree(Grid::new(500, 500), 0.5);
-        let svg = grid_draw_svg(&grid);
-        fs::write("maze_image_gt.svg", svg).expect("failed to write SVG");
+            let grid = Growing_Tree(Grid::new(case[0], case[1]), 0.5);
+            let img = grid_draw_img(&grid);
+            let svg = grid_draw_svg(&grid);
+            img.save("maze_image_gt.png").expect("failed to write png");
+            img.save("maze_image_gt.jpg").expect("failed to write jpg");
+            fs::write("maze_image_gt.svg", svg).expect("failed to write SVG");
+        }
     }
 }
 
@@ -40,6 +58,7 @@ mod algorithm_tests {
 
     use crate::Generator::{Ellers, Growing_Tree};
     use crate::Maze::Grid::Grid;
+    use crate::Solver::dijkstra;
 
     #[test]
     fn eller_test() {
@@ -52,6 +71,15 @@ mod algorithm_tests {
     fn growing_tree_test() {
         for case in CASES {
             Growing_Tree(Grid::new(case[0], case[1]), 0.5);
+        }
+    }
+
+    #[test]
+    fn dijkstra_test() {
+        let cases: [[usize; 2]; 4] = [[2, 2], [10, 10], [100, 100], [1000, 1000]];
+        for case in cases {
+            let grid = Ellers(Grid::new(case[0], case[1]));
+            dijkstra([0, 0], [case[1] - 1, case[1] - 1], &grid);
         }
     }
 }

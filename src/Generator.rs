@@ -24,7 +24,7 @@ pub fn Ellers(mut grid: Grid) -> Grid {
         sets.get_mut(set).unwrap().push([0, row_index]);
 
         for cell_index in 1..grid.width {
-            if grid.get_cell([cell_index, row_index]).walls[0] {
+            if grid.get_cell(&[cell_index, row_index]).walls[0] {
                 sets.push(vec![]);
                 set += 1;
             }

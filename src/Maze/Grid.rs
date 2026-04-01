@@ -26,7 +26,7 @@ impl Grid {
         }
     }
 
-    pub fn get_cell(&self, coords: [usize; 2]) -> &Cell {
+    pub fn get_cell(&self, coords: &[usize; 2]) -> &Cell {
         self.row_list
             .get(coords[1])
             .unwrap()
@@ -35,7 +35,7 @@ impl Grid {
             .unwrap()
     }
 
-    fn get_mut_cell(&mut self, coords: [usize; 2]) -> &mut Cell {
+    fn get_mut_cell(&mut self, coords: &[usize; 2]) -> &mut Cell {
         self.row_list
             .get_mut(coords[1])
             .unwrap()
@@ -47,23 +47,55 @@ impl Grid {
     pub fn Merge(&mut self, coords: [usize; 2], direction: &directions) {
         match direction {
             left => {
-                self.get_mut_cell(coords).walls[0] = false;
-                self.get_mut_cell([coords[0] - 1, coords[1]]).walls[2] = false;
+                self.get_mut_cell(&coords).walls[0] = false;
+                self.get_mut_cell(&[coords[0] - 1, coords[1]]).walls[2] = false;
             }
 
             right => {
-                self.get_mut_cell(coords).walls[2] = false;
-                self.get_mut_cell([coords[0] + 1, coords[1]]).walls[0] = false;
+                self.get_mut_cell(&coords).walls[2] = false;
+                self.get_mut_cell(&[coords[0] + 1, coords[1]]).walls[0] = false;
             }
 
             down => {
-                self.get_mut_cell(coords).walls[1] = false;
+                self.get_mut_cell(&coords).walls[1] = false;
             }
 
             up => {
-                self.get_mut_cell([coords[0], coords[1] - 1]).walls[1] = false;
+                self.get_mut_cell(&[coords[0], coords[1] - 1]).walls[1] = false;
             }
         }
+    }
+
+    pub fn get_all_cells(&self) -> Vec<[usize; 2]> {
+        let mut cells = Vec::new();
+
+        for row in self.row_list.iter() {
+            for cell in row.cell_list.iter() {
+                cells.push(cell.position);
+            }
+        }
+
+        cells
+    }
+
+    pub fn find_movable_neighbours(&self, current: &[usize; 2]) -> Vec<[usize; 2]> {
+        let mut neighbours = Vec::new();
+        let walls = self.get_cell(current).walls;
+        if !walls[0] {
+            neighbours.push(self.get_cell(&[current[0] - 1, current[1]]).position);
+        }
+        if !walls[1] {
+            neighbours.push(self.get_cell(&[current[0], current[1] + 1]).position);
+        }
+        if !walls[2] {
+            neighbours.push(self.get_cell(&[current[0] + 1, current[1]]).position);
+        }
+        if current[1] > 0 {
+            if !self.get_cell(&[current[0], current[1] - 1]).walls[1] {
+                neighbours.push(self.get_cell(&[current[0], current[1] - 1]).position);
+            }
+        }
+        neighbours
     }
 
     pub fn find_neighbours(
