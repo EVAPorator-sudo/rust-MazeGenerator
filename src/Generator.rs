@@ -13,7 +13,7 @@ pub fn Ellers(mut grid: Grid) -> Grid {
     }
     let mut rng = rand::rng();
 
-    for row_index in 0..grid.height {
+    for row_index in 0..(grid.height - 1) {
         for cell_index in 1..grid.width {
             if rng.random_bool(0.5) {
                 grid.Merge([cell_index, row_index], &directions::left);
@@ -48,8 +48,8 @@ pub fn Ellers(mut grid: Grid) -> Grid {
                     carve_points.push(new_carve);
                 }
             }
-            for index in 0..carve_points.len() {
-                grid.Merge(*working_set.get(index).unwrap(), &directions::down);
+            for carve_point in &carve_points {
+                grid.Merge(*working_set.get(*carve_point).unwrap(), &directions::down);
             }
         }
     }
@@ -85,32 +85,30 @@ pub fn Growing_Tree(mut grid: Grid, weighting: f32) -> Grid {
     ]);
 
     while !active_list.is_empty() {
-        let active_cell: &[usize; 2];
+        let active_cell: [usize; 2];
         if rng.random_range(0.00..1.00) < weighting && active_list.len() > 1 {
-            active_cell = active_list
-                .get(rng.random_range(0..(active_list.len() - 1)))
-                .unwrap();
+            active_cell = active_list[rng.random_range(0..(active_list.len()))];
         } else {
-            active_cell = active_list.get(active_list.len() - 1).unwrap();
+            active_cell = active_list[active_list.len() - 1]
         }
 
-        visited.insert(*active_cell);
-        let mut neighbours = grid.find_neighbours(&active_cell, &visited);
+        visited.insert(active_cell);
+        let neighbours = grid.find_neighbours(&active_cell, &visited);
 
         if neighbours.is_empty() {
-            let active_index = active_list.iter().position(|x| x == active_cell).unwrap();
+            let active_index = active_list.iter().position(|x| *x == active_cell).unwrap();
             active_list.remove(active_index);
         } else if neighbours.len() == 1 {
             let neighbour = direction_find(&active_cell, &neighbours[0]);
-            grid.Merge(*active_cell, &neighbours[0]);
+            grid.Merge(active_cell, &neighbours[0]);
             if !visited.contains(&neighbour) {
                 active_list.push(neighbour);
                 visited.insert(neighbour);
             }
         } else {
-            let direction = &neighbours[rng.random_range(0..(neighbours.len() - 1))];
-            grid.Merge(*active_cell, direction);
-            let neighbour = direction_find(active_cell, direction);
+            let direction = &neighbours[rng.random_range(0..(neighbours.len()))];
+            grid.Merge(active_cell, direction);
+            let neighbour = direction_find(&active_cell, direction);
             if !visited.contains(&neighbour) {
                 active_list.push(neighbour);
                 visited.insert(neighbour);
