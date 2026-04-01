@@ -16,7 +16,7 @@ pub enum directions {
 #[cfg(test)]
 mod draw_test {
     use crate::{
-        Draw::grid_draw,
+        Draw::*,
         Generator::{Ellers, Growing_Tree},
         Maze::Grid::Grid,
     };
@@ -25,11 +25,11 @@ mod draw_test {
     #[test]
     fn no_path() {
         let grid = Ellers(Grid::new(500, 500));
-        let svg = grid_draw(&grid);
+        let svg = grid_draw_svg(&grid);
         fs::write("maze_image_e.svg", svg).expect("failed to write SVG");
 
         let grid = Growing_Tree(Grid::new(500, 500), 0.5);
-        let svg = grid_draw(&grid);
+        let svg = grid_draw_svg(&grid);
         fs::write("maze_image_gt.svg", svg).expect("failed to write SVG");
     }
 }
