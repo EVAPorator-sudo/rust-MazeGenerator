@@ -6,6 +6,7 @@ pub mod Draw;
 pub mod Generator;
 pub mod Maze;
 pub mod Solver;
+pub mod Data_Structures;
 
 pub enum directions {
     left,
