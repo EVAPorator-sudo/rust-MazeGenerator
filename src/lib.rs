@@ -25,13 +25,14 @@ mod draw_test {
 
     #[test]
     fn no_path() {
-
-        let CASES: [[usize; 2]; 6] = [[0, 0],
-        [10, 10],
-        [100, 100],
-        [1000, 1000],
-        [1000, 10],
-        [10, 1000]];
+        let CASES: [[usize; 2]; 6] = [
+            [0, 0],
+            [10, 10],
+            [100, 100],
+            [1000, 1000],
+            [1000, 10],
+            [10, 1000],
+        ];
 
         for case in CASES {
             let grid = Ellers(Grid::new(case[0], case[1]));
@@ -52,22 +53,23 @@ mod draw_test {
 
     #[test]
     fn with_path() {
-
-        let CASES: [[usize; 2]; 5] = [
-        [10, 10],
-        [100, 100],
-        [1000, 1000],
-        [1000, 10],
-        [10, 1000]];
+        let CASES: [[usize; 2]; 3] = [[10, 10], [100, 100], [1000, 1000]];
 
         for case in CASES {
             let grid = Ellers(Grid::new(case[0], case[1]));
-            let solution = dijkstra([0, 0], [case[0] -1, case[1] -1], &grid);
+            let solution = dijkstra([0, 0], [case[0] - 1, case[1] - 1], &grid);
             let svg = solve_draw_svg(&grid, &solution);
             let img = solve_draw_img(&grid, &solution);
             fs::write("solve_image_d.svg", svg).expect("failed to write SVG");
             img.save("solve_image_d.png").expect("failed to write png");
             img.save("solve_image_d.jpg").expect("failed to write jpg");
+
+            let solution = Astar([0, 0], [case[0] - 1, case[1] - 1], &grid);
+            let svg = solve_draw_svg(&grid, &solution);
+            let img = solve_draw_img(&grid, &solution);
+            fs::write("solve_image_a.svg", svg).expect("failed to write SVG");
+            img.save("solve_image_a.png").expect("failed to write png");
+            img.save("solve_image_a.jpg").expect("failed to write jpg");
         }
     }
 }

@@ -1,5 +1,9 @@
 use crate::Maze::Grid::Grid;
-use std::{cmp::Reverse, collections::{BinaryHeap, HashMap}, i32};
+use std::{
+    cmp::Reverse,
+    collections::{BinaryHeap, HashMap},
+    i32,
+};
 
 pub fn dijkstra(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]> {
     let mut g_score: HashMap<[usize; 2], i32> = HashMap::new();
@@ -14,7 +18,6 @@ pub fn dijkstra(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 
     queue.push(Reverse((0, start)));
 
     while let Some(Reverse((g, current))) = queue.pop() {
-
         if current == end {
             break;
         } else if g > g_score[&current] {
@@ -28,7 +31,7 @@ pub fn dijkstra(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 
                 g_score.insert(neighbour, neighbour_distance);
                 previous.insert(neighbour, current);
 
-                queue.push(Reverse((neighbour_distance ,neighbour)));
+                queue.push(Reverse((neighbour_distance, neighbour)));
             }
         }
     }
@@ -70,8 +73,6 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
     queue.push(Reverse((manhattan(start, end), start)));
 
     while let Some(Reverse((f, current))) = queue.pop() {
-
-
         if current == end {
             break;
         } else if f > f_score[&current] {
@@ -86,7 +87,10 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
                 f_score.insert(neighbour, neighbour_distance + manhattan(neighbour, end));
                 previous.insert(neighbour, current);
 
-                queue.push(Reverse((manhattan(neighbour, end) + neighbour_distance, neighbour)));
+                queue.push(Reverse((
+                    manhattan(neighbour, end) + neighbour_distance,
+                    neighbour,
+                )));
             }
         }
     }
@@ -107,3 +111,4 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
 
     path
 }
+
