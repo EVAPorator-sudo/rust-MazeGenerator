@@ -60,10 +60,10 @@ fn lowest_g_score(queue: &mut Vec<[usize; 2]>, map: &HashMap<[usize; 2], i32>) -
     queue.remove(lowest)
 }
 
-fn lowest_total_score(queue: &mut Vec<[usize; 2]>, g_map: &HashMap<[usize; 2], i32>, f_map: &HashMap<[usize; 2], i32>) -> [usize; 2] {
+fn lowest_f_score(queue: &mut Vec<[usize; 2]>, map: &HashMap<[usize; 2], i32>) -> [usize; 2] {
     let mut lowest = 0;
     for i in 1..queue.len() {
-        if g_map[&queue[i]] + f_map[&queue[i]] < g_map[&queue[lowest]] + f_map[&queue[lowest]]{
+        if map[&queue[i]] < map[&queue[lowest]]{
             lowest = i;
         }
     }
@@ -72,7 +72,7 @@ fn lowest_total_score(queue: &mut Vec<[usize; 2]>, g_map: &HashMap<[usize; 2], i
 }
 
 fn manhattan(start: [usize; 2], end: [usize; 2]) -> i32 {
-    ((end[0] as i32 - start[0] as i32) + (end[1] as i32 - start[1] as i32)).abs()
+    ((end[0] as i32 - start[0] as i32).abs() + (end[1] as i32 - start[1] as i32)).abs()
 }
 
 pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]> {
@@ -91,7 +91,7 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
     queue.push(start);
 
     while !queue.is_empty() {
-        let current = lowest_total_score(&mut queue, &g_score, &f_score);
+        let current = lowest_f_score(&mut queue, &f_score);
 
         if current == end {
             break;
@@ -102,7 +102,7 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
 
             if neighbour_distance < *g_score.get(&neighbour).unwrap() {
                 g_score.insert(neighbour, neighbour_distance);
-                f_score.insert(neighbour, manhattan(neighbour, end));
+                f_score.insert(neighbour, neighbour_distance + manhattan(neighbour, end));
                 previous.insert(neighbour, current);
 
                 queue.retain(|&x| x != neighbour);
