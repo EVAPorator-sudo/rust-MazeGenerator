@@ -58,7 +58,7 @@ mod algorithm_tests {
 
     use crate::Generator::{Ellers, Growing_Tree};
     use crate::Maze::Grid::Grid;
-    use crate::Solver::dijkstra;
+    use crate::Solver::{Astar, dijkstra};
 
     #[test]
     fn eller_test() {
@@ -80,6 +80,15 @@ mod algorithm_tests {
         for case in cases {
             let grid = Ellers(Grid::new(case[0], case[1]));
             dijkstra([0, 0], [case[1] - 1, case[1] - 1], &grid);
+        }
+    }
+
+    #[test]
+    fn Astar_test() {
+        let cases: [[usize; 2]; 4] = [[2, 2], [10, 10], [100, 100], [1000, 1000]];
+        for case in cases {
+            let grid = Ellers(Grid::new(case[0], case[1]));
+            Astar([0, 0], [case[1] - 1, case[1] - 1], &grid);
         }
     }
 }
