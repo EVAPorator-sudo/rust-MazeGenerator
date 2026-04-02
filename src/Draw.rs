@@ -1,4 +1,6 @@
-use image::{ImageBuffer, Luma};
+use std::ptr::null;
+
+use image::{ImageBuffer, Luma, Rgb};
 
 use crate::Maze::Grid::Grid;
 
@@ -167,4 +169,82 @@ pub fn grid_draw_img(grid: &Grid) -> ImageBuffer<Luma<u8>, Vec<u8>> {
     }
 
     img
+}
+
+pub fn solve_draw_svg(grid: &Grid, solution: &Vec<[usize; 2]>) -> String {
+    let mut svg = grid_draw_svg(&grid);
+
+
+    let cell_size = 20;
+    let wall_thickness = 1;
+
+    let mut previous = solution[0];
+
+
+
+    for &cell in &solution[1..] {
+        let x1 = wall_thickness + previous[0] * cell_size + cell_size / 2;
+        let y1 = wall_thickness + previous[1] * cell_size + cell_size / 2;
+
+        let x2 = wall_thickness + cell[0] * cell_size + cell_size / 2;
+        let y2 = wall_thickness + cell[1] * cell_size + cell_size / 2;
+
+        // append a line to the SVG
+        svg.push_str(&format!(
+            r#"<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="red" stroke-width="2"/>"#
+        ));
+
+        previous = cell;
+    }
+
+
+    svg
+}
+
+pub fn solve_draw_img(grid: &Grid, solution: &Vec<[usize; 2]>) -> ImageBuffer<Rgb<u8>, Vec<u8>>{
+    let img = grid_draw_img(&grid);
+    let mut rgb_img: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::new(img.width(), img.height());
+
+    let cell_size = 20;
+    let wall_thickness = 1;
+
+    let red = Rgb([255, 0, 0]);
+
+    for (x, y, pixel) in img.enumerate_pixels() {
+        let Luma([v]) = *pixel;
+        rgb_img.put_pixel(x, y, Rgb([v, v, v]));
+    }
+
+let draw_line = |img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+                 x1: usize, y1: usize,
+                 x2: usize, y2: usize,
+                 wall_thickness: usize| {
+    let start_x = x1.min(x2) as u32;
+    let end_x = x1.max(x2) as u32;
+    let start_y = y1.min(y2) as u32;
+    let end_y = y1.max(y2) as u32;
+    let wall_thickness = wall_thickness as u32;
+
+    for px in start_x..=(end_x + wall_thickness - 1).min(img.width() - 1) {
+        for py in start_y..=(end_y + wall_thickness - 1).min(img.height() - 1) {
+            img.put_pixel(px, py, red);
+        }
+    }
+};
+
+    let mut previous = solution[0];
+
+    for cell in &solution[1..] {
+        let x1 = wall_thickness + previous[0] * cell_size + cell_size / 2;
+        let y1 = wall_thickness + previous[1] * cell_size + cell_size / 2;
+
+        let x2 = wall_thickness + cell[0] * cell_size + cell_size / 2;
+        let y2 = wall_thickness + cell[1] * cell_size + cell_size / 2;
+
+        draw_line(&mut rgb_img, x1, x2, y1, y2, wall_thickness);
+
+        previous = *cell;
+    }
+
+    rgb_img
 }

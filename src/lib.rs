@@ -19,20 +19,20 @@ mod draw_test {
         Draw::*,
         Generator::{Ellers, Growing_Tree},
         Maze::Grid::Grid,
+        Solver::*,
     };
     use std::fs;
 
-    const CASES: [[usize; 2]; 6] = [
-        [0, 0],
+    #[test]
+    fn no_path() {
+
+        let CASES: [[usize; 2]; 6] = [[0, 0],
         [10, 10],
         [100, 100],
         [1000, 1000],
         [1000, 10],
-        [10, 1000],
-    ];
+        [10, 1000]];
 
-    #[test]
-    fn no_path() {
         for case in CASES {
             let grid = Ellers(Grid::new(case[0], case[1]));
             let img = grid_draw_img(&grid);
@@ -47,6 +47,27 @@ mod draw_test {
             img.save("maze_image_gt.png").expect("failed to write png");
             img.save("maze_image_gt.jpg").expect("failed to write jpg");
             fs::write("maze_image_gt.svg", svg).expect("failed to write SVG");
+        }
+    }
+
+    #[test]
+    fn with_path() {
+
+        let CASES: [[usize; 2]; 5] = [
+        [10, 10],
+        [100, 100],
+        [1000, 1000],
+        [1000, 10],
+        [10, 1000]];
+
+        for case in CASES {
+            let grid = Ellers(Grid::new(case[0], case[1]));
+            let solution = dijkstra([0, 0], [case[0] -1, case[1] -1], &grid);
+            let svg = solve_draw_svg(&grid, &solution);
+            let img = solve_draw_img(&grid, &solution);
+            fs::write("solve_image_d.svg", svg).expect("failed to write SVG");
+            img.save("solve_image_d.png").expect("failed to write png");
+            img.save("solve_image_d.jpg").expect("failed to write jpg");
         }
     }
 }
