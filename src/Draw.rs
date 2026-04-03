@@ -1,4 +1,3 @@
-use std::ptr::null;
 
 use image::{ImageBuffer, Luma, Rgb};
 
