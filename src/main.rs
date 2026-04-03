@@ -1,4 +1,9 @@
-use MazeGenerator::{Draw::*, Generator::*, Maze::Grid::Grid};
+use MazeGenerator::{
+    Draw::*,
+    Generator::*,
+    Maze::Grid::Grid,
+    Solver::{Astar, dijkstra},
+};
 use core::panic;
 use std::{env, fs, io::stdin};
 
@@ -7,11 +12,21 @@ fn main() {
 
     if args.len() == 1 {
         args.push(select_algorithm());
+        args[1].push_str(select_solve_algorithm().as_str());
         args.push(select_dimension("width"));
         args.push(select_dimension("height"));
 
-        if args[1] == "--g" {
+        if args[1].contains("--g") {
             args.push(select_weight());
+        }
+
+        if args[1].contains("d") || args[1].contains("a") {
+            let coords =
+                select_solution_coordinates(args[2].parse().unwrap(), args[3].parse().unwrap());
+
+            for coord in coords {
+                args.push(coord);
+            }
         }
 
         args.push(select_output_path());
@@ -69,6 +84,51 @@ fn read_input() -> String {
     input
 }
 
+fn select_solve_algorithm() -> String {
+    loop {
+        println!("Solution algorithm:\n0. no Solution\n1. Dijkstra's\n2. A*");
+        match read_input().trim() {
+            "0" => return "".to_string(),
+            "1" => return "d".to_string(),
+            "2" => return "a".to_string(),
+            _ => println!("Invalid input, please enter 0, 1 or 2"),
+        }
+    }
+}
+
+fn select_solution_coordinates(width: usize, height: usize) -> [String; 4] {
+    loop {
+        println!("Enter start X:");
+        let x1 = read_input().trim().parse::<usize>();
+
+        println!("Enter start Y:");
+        let y1 = read_input().trim().parse::<usize>();
+
+        println!("Enter end X:");
+        let x2 = read_input().trim().parse::<usize>();
+
+        println!("Enter end Y:");
+        let y2 = read_input().trim().parse::<usize>();
+
+        if let (Ok(x1), Ok(y1), Ok(x2), Ok(y2)) = (x1, y1, x2, y2) {
+            if x1 < width && y1 < height && x2 < width && y2 < height {
+                return [
+                    x1.to_string(),
+                    y1.to_string(),
+                    x2.to_string(),
+                    y2.to_string(),
+                ];
+            }
+        }
+
+        println!(
+            "Invalid input. Coordinates must be within (0..{}, 0..{})",
+            width - 1,
+            height - 1
+        );
+    }
+}
+
 fn handle(args: Vec<String>) {
     if args.len() < 5 {
         panic!("Invalid arguments");
@@ -77,31 +137,72 @@ fn handle(args: Vec<String>) {
     let width: usize = args[2].parse().expect("Width must be a positive integer");
     let height: usize = args[3].parse().expect("Height must be a positive integer");
 
-    let grid = match args[1].as_str() {
-        "--e" => Ellers(Grid::new(width, height)),
-        "--g" => {
-            if args.len() < 6 {
-                panic!("Missing weight for Growing Tree");
-            }
+    let chars: Vec<char> = args[1].chars().collect();
+
+    let coord_starting;
+
+    let grid = match chars[2] {
+        'g' => {
+            coord_starting = 5;
             Growing_Tree(
                 Grid::new(width, height),
                 args[4]
                     .parse()
-                    .expect("Weight must be a decimal between 0 and 1"),
+                    .expect("Weighting must be a decimal between 0 and 1"),
             )
         }
-        _ => panic!("Invalid algorithm"),
+        'e' => {
+            coord_starting = 4;
+            Ellers(Grid::new(width, height))
+        }
+        _ => panic!("invalid algorithm"),
     };
 
     let path = args.last().unwrap();
 
-    if path.ends_with(".svg") {
-        fs::write(path, grid_draw_svg(&grid)).expect("Error writing maze to disk");
-    } else if path.ends_with(".png") || path.ends_with(".jpg") {
-        grid_draw_img(&grid)
-            .save(path)
-            .expect("Error writing maze to disk");
+    if chars.len() > 3 {
+        let start: [usize; 2] = [
+            args[coord_starting]
+                .parse()
+                .expect("Please enter a valid x coordinate in the maze"),
+            args[coord_starting + 1]
+                .parse()
+                .expect("Please enter a valid y coordinate in the maze"),
+        ];
+
+        let end: [usize; 2] = [
+            args[coord_starting + 2]
+                .parse()
+                .expect("Please enter a valid x coordinate in the maze"),
+            args[coord_starting + 3]
+                .parse()
+                .expect("Please enter a valid y coordinate in the maze"),
+        ];
+
+        let solution = match chars[3] {
+            'd' => dijkstra(start, end, &grid),
+            'a' => Astar(start, end, &grid),
+            _ => panic!("invalid algorithm"),
+        };
+
+        if path.ends_with(".svg") {
+            fs::write(path, solve_draw_svg(&grid, &solution)).expect("Error writing maze to disk");
+        } else if path.ends_with(".png") || path.ends_with(".jpg") {
+            solve_draw_img(&grid, &solution)
+                .save(path)
+                .expect("Error writing maze to disk");
+        } else {
+            panic!("Invalid file extension");
+        }
     } else {
-        panic!("Invalid file extension");
+        if path.ends_with(".svg") {
+            fs::write(path, grid_draw_svg(&grid)).expect("Error writing maze to disk");
+        } else if path.ends_with(".png") || path.ends_with(".jpg") {
+            grid_draw_img(&grid)
+                .save(path)
+                .expect("Error writing maze to disk");
+        } else {
+            panic!("Invalid file extension");
+        }
     }
 }
