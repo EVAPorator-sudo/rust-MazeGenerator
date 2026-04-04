@@ -39,15 +39,16 @@ pub fn Ellers(mut grid: Grid) -> Grid {
                 carves = rng.random_range(1..working_set.len());
             }
 
-            let mut carve_points: Vec<usize> = Vec::new();
+            let mut indexes: Vec<usize> = (0..working_set.len()).collect();
 
-            while carve_points.len() < carves {
-                let new_carve: usize = rng.random_range(0..working_set.len());
-                if !carve_points.contains(&new_carve) {
-                    carve_points.push(new_carve);
-                }
+            for i in 0..carves {
+                let j = rng.random_range(i..indexes.len());
+                indexes.swap(i, j);
             }
-            for carve_point in &carve_points {
+
+            let carve_points = &indexes[..carves];
+
+            for carve_point in carve_points {
                 grid.Merge(*working_set.get(*carve_point).unwrap(), &directions::down);
             }
         }
