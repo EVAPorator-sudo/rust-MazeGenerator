@@ -7,6 +7,15 @@ use MazeGenerator::{
 
 use std::{env, fs, io::stdin};
 
+// args layout:
+// [0] binary name
+// [1] flags e.g. "--ed" (algorithm + solve algorithm)
+// [2] width
+// [3] height
+// [4] weighting (Growing Tree only)
+// [4/5..] start x, start y, end x, end y (if solving)
+// last: output path
+// if no input is supplied the user will be asked to input each arg
 fn main() {
     let mut args: Vec<String> = env::args().collect();
 
@@ -141,6 +150,19 @@ fn handle(args: Vec<String>) {
 
     let coord_starting;
 
+    let img_extensions = [
+        "png", "jpg", "jpeg", "bmp", "gif", "ico", "tiff", "tif", "webp", "tga", "qoi",
+    ];
+
+    let path = args.last().unwrap();
+    let extension = path.split('.').last().unwrap_or("");
+
+    if !img_extensions.contains(&extension) {
+        panic!("invalid file extension");
+    }
+
+    validate_dimensions(width, height, extension);
+
     let grid = match chars[2] {
         'g' => {
             coord_starting = 5;
@@ -157,8 +179,6 @@ fn handle(args: Vec<String>) {
         }
         _ => panic!("invalid algorithm"),
     };
-
-    let path = args.last().unwrap();
 
     if chars.len() > 3 {
         let start: [usize; 2] = [
@@ -184,25 +204,46 @@ fn handle(args: Vec<String>) {
             'a' => Astar(start, end, &grid),
             _ => panic!("invalid algorithm"),
         };
-
         if path.ends_with(".svg") {
             fs::write(path, solve_draw_svg(&grid, &solution)).expect("Error writing maze to disk");
-        } else if path.ends_with(".png") || path.ends_with(".jpg") {
+        } else {
             solve_draw_img(&grid, &solution)
                 .save(path)
                 .expect("Error writing maze to disk");
-        } else {
-            panic!("Invalid file extension");
         }
     } else {
         if path.ends_with(".svg") {
             fs::write(path, grid_draw_svg(&grid)).expect("Error writing maze to disk");
-        } else if path.ends_with(".png") || path.ends_with(".jpg") {
+        } else {
             grid_draw_img(&grid)
                 .save(path)
                 .expect("Error writing maze to disk");
-        } else {
-            panic!("Invalid file extension");
         }
+    }
+}
+
+fn get_format_limits(extension: &str) -> Option<(u32, u32)> {
+    match extension {
+        "png" => Some((u32::MAX, u32::MAX)),
+        "jpg" | "jpeg" => Some((65535, 65535)),
+        "webp" => Some((16383, 16383)),
+        "bmp" => Some((u32::MAX, u32::MAX)),
+        "gif" => Some((65535, 65535)),
+        "tiff" | "tif" => Some((u32::MAX, u32::MAX)),
+        "ico" => Some((256, 256)),
+        "tga" => Some((65535, 65535)),
+        "qoi" => Some((u32::MAX, u32::MAX)),
+        "svg" => Some((u32::MAX, u32::MAX)),
+        _ => None,
+    }
+}
+
+fn validate_dimensions(width: usize, height: usize, extension: &str) {
+    let img_width = (width * 20 + 2 * 1) as u32;
+    let img_height = (height * 20 + 2 * 1) as u32;
+    let limits = get_format_limits(extension).unwrap();
+
+    if limits.0 < img_width || limits.1 < img_height {
+        panic!("Dimensions exceed file extension limits");
     }
 }
