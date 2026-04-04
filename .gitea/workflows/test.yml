@@ -10,11 +10,16 @@ jobs:
     runs-on: self-hosted
 
     container:
-      image: rust:latest
+      image: node:20-bullseye
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Cache dependencies
         uses: actions/cache@v4
