@@ -151,7 +151,7 @@ fn handle(args: Vec<String>) {
     let coord_starting;
 
     let img_extensions = [
-        "png", "jpg", "jpeg", "bmp", "gif", "ico", "tiff", "tif", "webp", "tga", "qoi",
+        "png", "jpg", "jpeg", "bmp", "gif", "ico", "tiff", "tif", "webp", "tga", "qoi", "svg",
     ];
 
     let path = args.last().unwrap();
