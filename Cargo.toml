@@ -4,6 +4,9 @@ version = "0.1.1"
 edition = "2024"
 license = "Apache-2.0"
 description = "A maze generation api (wip)"
+repository = "https://github.com/EVAPorator-sudo/rust-MazeGenerator"
+documentation = "https://docs.rs/MazeGenerator/latest/MazeGenerator/"
+homepage = "https://github.com/EVAPorator-sudo/rust-MazeGenerator"
 
 [dependencies]
 rand = "0.10.0"
