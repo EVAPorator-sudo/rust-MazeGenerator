@@ -1,3 +1,48 @@
+//! # MazeGenerator
+//!
+//! A library for generating and solving mazes.
+//!
+//! ## Generating a maze
+//!
+//! Choose an algorithm from [`Generator`] and pass it an initialised [`Maze::Grid::Grid`]:
+//!
+//! ```
+//! use MazeGenerator::Generator::Ellers;
+//! use MazeGenerator::Maze::Grid::Grid;
+//!
+//! let grid = Ellers(Grid::new(10, 10));
+//! ```
+//!
+//! ## Solving a maze
+//!
+//! Pass the generated grid to a solver from [`Solver`]:
+//!
+//! ```
+//! use MazeGenerator::Generator::Ellers;
+//! use MazeGenerator::Maze::Grid::Grid;
+//! use MazeGenerator::Solver::dijkstra;
+//!
+//! let grid = Ellers(Grid::new(10, 10));
+//! let path = dijkstra([0, 0], [9, 9], &grid);
+//! ```
+//!
+//! ## Rendering a maze
+//!
+//! Pass the grid and optional solution to a function from [`Draw`]:
+//!
+//! ```
+//! use MazeGenerator::Generator::Ellers;
+//! use MazeGenerator::Maze::Grid::Grid;
+//! use MazeGenerator::Solver::dijkstra;
+//! use MazeGenerator::Draw::{solve_draw_svg, grid_draw_svg};
+//!
+//! let grid = Ellers(Grid::new(10, 10));
+//! let svg = grid_draw_svg(&grid);
+//!
+//! let solution = dijkstra([0, 0], [9, 9], &grid);
+//! let solved_svg = solve_draw_svg(&grid, &solution);
+//! ```
+
 pub mod Draw;
 pub mod Generator;
 pub mod Maze;

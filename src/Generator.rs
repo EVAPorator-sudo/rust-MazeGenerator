@@ -1,3 +1,11 @@
+//! Maze generation algorithms.
+//!
+//! This module provides two algorithms for generating mazes using a [`crate::Maze::Grid::Grid`]:
+//!
+//! - [`Ellers`] — a row-by-row method based on Eller's algorithm
+//! - [`Growing_Tree`] — a configurable algorithm that can behave anywhere between
+//!   recursive backtracking and Prim's algorithm depending on the `weighting` parameter
+
 use std::collections::HashSet;
 
 use rand::RngExt;
@@ -6,6 +14,30 @@ use crate::Maze::Grid::Grid;
 use crate::directions;
 use crate::directions::*;
 
+/// Generates a maze using Eller's algorithm.
+///
+/// Works row by row, randomly merging adjacent cells within each row,
+/// then carving at least one downward passage per set to guarantee connected rows.
+/// The final row merges all remaining sets into one.
+///
+/// # Arguments
+///
+/// * `grid` - A [`crate::Maze::Grid::Grid`] to generate the maze onto
+///
+/// # Returns
+///
+/// The same [`crate::Maze::Grid::Grid`] containing a maze.
+///
+/// # Examples
+///
+/// ```
+/// use MazeGenerator::Generator::Ellers;
+/// use MazeGenerator::Maze::Grid::Grid;
+///
+/// let grid = Ellers(Grid::new(10, 10));
+/// assert_eq!(grid.width, 10);
+/// assert_eq!(grid.height, 10);
+/// ```
 pub fn Ellers(mut grid: Grid) -> Grid {
     if grid.width == 0 || grid.height == 0 {
         return grid;
@@ -61,6 +93,20 @@ pub fn Ellers(mut grid: Grid) -> Grid {
     grid
 }
 
+/// Finds neighbouring coordinates by direction input
+///
+/// # Arguments
+///
+/// * `coords` - The `[x, y]` starting coordinates
+/// * `direction` - The [`crate::directions`] to move in
+///
+/// # Returns
+///
+/// A new `[x, y]` coordinate one step in the given direction.
+///
+/// # Panics
+///
+/// Panics on underflow if moving left from x=0 or up from y=0.
 fn direction_find(coords: &[usize; 2], direction: &directions) -> [usize; 2] {
     match direction {
         left => [coords[0] - 1, coords[1]],
@@ -70,6 +116,39 @@ fn direction_find(coords: &[usize; 2], direction: &directions) -> [usize; 2] {
     }
 }
 
+/// Generates a maze using the Growing Tree algorithm.
+///
+/// The `weighting` parameter controls the behaviour of the algorithm:
+///
+/// - `0.0` — always selects the most recently added cell, producing a
+///   recursive backtracker
+/// - `1.0` — always selects a random cell from the active list, producing
+///   behaviour similar to Prim's algorithm
+/// - values between `0.0` and `1.0` randonly switch between each producing a less uniform Maze
+///
+/// # Arguments
+///
+/// * `grid` - A [`crate::Maze::Grid::Grid`] to generate the maze onto
+/// * `weighting` - A value between `0.0` and `1.0` controlling cell selection
+///
+/// # Returns
+///
+/// The same [`crate::Maze::Grid::Grid`] containing a maze.
+///
+/// # Examples
+///
+/// ```
+/// use MazeGenerator::Generator::Growing_Tree;
+/// use MazeGenerator::Maze::Grid::Grid;
+///
+/// // recursive backtracker style
+/// let grid = Growing_Tree(Grid::new(10, 10), 0.0);
+/// assert_eq!(grid.width, 10);
+///
+/// // Prim's style
+/// let grid = Growing_Tree(Grid::new(10, 10), 1.0);
+/// assert_eq!(grid.width, 10);
+/// ```
 pub fn Growing_Tree(mut grid: Grid, weighting: f32) -> Grid {
     if grid.width == 0 || grid.height == 0 {
         return grid;

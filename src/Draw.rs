@@ -1,14 +1,52 @@
+//! Maze rendering functions.
+//!
+//! This module provides functions to render a [`crate::Maze::Grid::Grid`] to either
+//! SVG or raster image formats via the [`image`] crate.
+//!
+//! There are four public functions split across two output types:
+//!
+//! - [`grid_draw_svg`] / [`grid_draw_img`] — render the maze with no solution path
+//! - [`solve_draw_svg`] / [`solve_draw_img`] — render the maze with a solution path overlaid in red
+//!
+//! Outputs from the grid_draw methods return a luma image which will require conversion to an rgb
+//! if needed. The inverse is also true for the solve_draw methods.
 
 use image::{ImageBuffer, Luma, Rgb};
 
 use crate::Maze::Grid::Grid;
 
+/// Supported image formats for maze output.
 pub enum img_format {
     svg,
     png,
     jpeg,
 }
 
+/// Renders a [`crate::Maze::Grid::Grid`] to an SVG string.
+///
+/// Each cell is rendered at 20x20 pixels with 1px walls.
+/// The outer border is always drawn regardless of cell wall state.
+///
+/// # Arguments
+///
+/// * `grid` - A reference to the [`crate::Maze::Grid::Grid`] to render
+///
+/// # Returns
+///
+/// A `String` containing the complete SVG markup.
+///
+/// # Examples
+///
+/// ```
+/// use MazeGenerator::Generator::Ellers;
+/// use MazeGenerator::Maze::Grid::Grid;
+/// use MazeGenerator::Draw::grid_draw_svg;
+///
+/// let grid = Ellers(Grid::new(10, 10));
+/// let svg = grid_draw_svg(&grid);
+/// assert!(svg.starts_with("<svg"));
+/// assert!(svg.ends_with("</svg>"));
+/// ```
 pub fn grid_draw_svg(grid: &Grid) -> String {
     let mut svg = String::new();
 
@@ -97,6 +135,21 @@ pub fn grid_draw_svg(grid: &Grid) -> String {
     svg
 }
 
+/// Renders a [`crate::Maze::Grid::Grid`] to a greyscale [`ImageBuffer`].
+///
+/// Each cell is rendered at 20x20 pixels with 1px walls.
+/// The output is a greyscale image with black walls and a white background.
+/// To save to disk, use the [`image`] crate's `.save()` method. Not all image formats are
+/// fully supported due to the maximum maze dimensions.
+/// e.g. a 900x900 grid exceeds the webp dimension limits when rendered.
+///
+/// # Arguments
+///
+/// * `grid` - A reference to the [`crate::Maze::Grid::Grid`] to render
+///
+/// # Returns
+///
+/// A greyscale [`ImageBuffer`] of the maze.
 pub fn grid_draw_img(grid: &Grid) -> ImageBuffer<Luma<u8>, Vec<u8>> {
     let cell_size = 20;
     let wall_thickness = 1;
@@ -170,6 +223,33 @@ pub fn grid_draw_img(grid: &Grid) -> ImageBuffer<Luma<u8>, Vec<u8>> {
     img
 }
 
+/// Renders a [`crate::Maze::Grid::Grid`] with a solution path overlaid as an SVG string.
+///
+/// Calls [`grid_draw_svg`] internally then draws the solution path as a red line
+/// connecting the centre of each cell in the solution.
+///
+/// # Arguments
+///
+/// * `grid` - A reference to the [`crate::Maze::Grid::Grid`] to render
+/// * `solution` - A reference to a solution path between [`crate::Maze::Cell::Cell`]s
+///
+/// # Returns
+///
+/// A `String` containing the complete SVG markup with the solution path overlaid.
+///
+/// # Examples
+///
+/// ```
+/// use MazeGenerator::Generator::Ellers;
+/// use MazeGenerator::Maze::Grid::Grid;
+/// use MazeGenerator::Solver::dijkstra;
+/// use MazeGenerator::Draw::solve_draw_svg;
+///
+/// let grid = Ellers(Grid::new(10, 10));
+/// let solution = dijkstra([0, 0], [9, 9], &grid);
+/// let svg = solve_draw_svg(&grid, &solution);
+/// assert!(svg.contains("stroke=\"red\""));
+/// ```
 pub fn solve_draw_svg(grid: &Grid, solution: &Vec<[usize; 2]>) -> String {
     let mut svg = grid_draw_svg(&grid);
     svg.truncate(svg.len() - "</svg>".len());
@@ -186,7 +266,6 @@ pub fn solve_draw_svg(grid: &Grid, solution: &Vec<[usize; 2]>) -> String {
         let x2 = wall_thickness + cell[0] * cell_size + cell_size / 2;
         let y2 = wall_thickness + cell[1] * cell_size + cell_size / 2;
 
-        // append a line to the SVG
         svg.push_str(&format!(
             r#"<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="red" stroke-width="2"/>"#
         ));
@@ -198,6 +277,22 @@ pub fn solve_draw_svg(grid: &Grid, solution: &Vec<[usize; 2]>) -> String {
     svg
 }
 
+/// Renders a [`crate::Maze::Grid::Grid`] with a solution path overlaid as an RGB [`ImageBuffer`].
+///
+/// Calls [`grid_draw_img`] internally, converts it to RGB, then draws the solution
+/// path as a red line connecting the centre of each cell in the solution.
+/// To save to disk, use the [`image`] crate's `.save()` method. Not all image formats are
+/// fully supported due to the maximum maze dimensions.
+/// e.g. a 900x900 grid exceeds the webp dimension limits when rendered.
+///
+/// # Arguments
+///
+/// * `grid` - A reference to the [`crate::Maze::Grid::Grid`] to render
+/// * `solution` - A reference to a solution path of [`crate::Maze::Cell::Cell`]s
+///
+/// # Returns
+///
+/// An RGB [`ImageBuffer`] of the maze with the solution path overlaid in red.
 pub fn solve_draw_img(grid: &Grid, solution: &Vec<[usize; 2]>) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     let img = grid_draw_img(&grid);
     let mut rgb_img: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::new(img.width(), img.height());
