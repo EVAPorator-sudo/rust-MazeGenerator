@@ -4,7 +4,7 @@ use MazeGenerator::{
     Maze::Grid::Grid,
     Solver::{Astar, dijkstra},
 };
-use core::panic;
+
 use std::{env, fs, io::stdin};
 
 fn main() {

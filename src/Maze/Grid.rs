@@ -67,7 +67,7 @@ impl Grid {
     }
 
     pub fn get_all_cells(&self) -> Vec<[usize; 2]> {
-        let mut cells = Vec::new();
+        let mut cells = Vec::with_capacity(self.width * self.height);
 
         for row in self.row_list.iter() {
             for cell in row.cell_list.iter() {

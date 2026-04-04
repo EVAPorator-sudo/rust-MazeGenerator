@@ -9,3 +9,6 @@ description = "A maze generation api (wip)"
 rand = "0.10.0"
 resvg = "0.47.0"
 image = "0.25.10"
+
+[lints.rust]
+nonstandard_style = "allow"

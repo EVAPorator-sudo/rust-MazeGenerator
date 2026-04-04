@@ -97,7 +97,7 @@ pub fn Growing_Tree(mut grid: Grid, weighting: f32) -> Grid {
 
         if neighbours.is_empty() {
             let active_index = active_list.iter().position(|x| *x == active_cell).unwrap();
-            active_list.remove(active_index);
+            active_list.swap_remove(active_index);
         } else if neighbours.len() == 1 {
             let neighbour = direction_find(&active_cell, &neighbours[0]);
             grid.Merge(active_cell, &neighbours[0]);
