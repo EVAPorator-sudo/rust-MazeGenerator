@@ -7,10 +7,12 @@
 //!   recursive backtracking and Prim's algorithm depending on the `weighting` parameter
 
 use std::collections::HashSet;
+use std::thread;
 
 use rand::RngExt;
 
 use crate::Maze::Grid::Grid;
+use crate::Maze::Row::Row;
 use crate::directions;
 use crate::directions::*;
 
@@ -195,4 +197,102 @@ pub fn Growing_Tree(mut grid: Grid, weighting: f32) -> Grid {
         }
     }
     grid
+}
+
+/// Generates a maze using Eller's algorithm using a mulththreaded method.
+///
+/// Divides the grid into chunks of rows for each cpu core to perform Eller's algorithm on.
+///
+/// # Arguments
+///
+/// * `grid` - A [`crate::Maze::Grid::Grid`] to generate the maze onto
+///
+/// # Returns
+///
+/// The same [`crate::Maze::Grid::Grid`] containing a maze.
+///
+/// # Examples
+///
+/// ```
+/// use MazeGenerator::Generator::multi_thread_ellers;
+/// use MazeGenerator::Maze::Grid::Grid;
+///
+/// let grid = multi_thread_ellers(Grid::new(10, 10));
+/// assert_eq!(grid.width, 10);
+/// assert_eq!(grid.height, 10);
+/// ```
+pub fn multi_thread_ellers(mut grid: Grid) -> Grid {
+    if grid.width == 0 || grid.height == 0 {
+        return grid;
+    } else if grid.height != 1 {
+        let cpus = num_cpus::get_physical();
+        let chunk_size = (grid.height - 1).div_ceil(cpus);
+
+        thread::scope(|s| {
+            for chunk in grid.row_list[..grid.height - 1].chunks_mut(chunk_size) {
+                s.spawn(|| process_chunk(chunk));
+            }
+        });
+    }
+
+    for cell_index in 0..(grid.width - 1) {
+        grid.Merge([cell_index, grid.height - 1], &directions::right);
+    }
+    grid
+}
+
+/// Performs Eller's algorithm on a chunk of rows.
+///
+/// Works row by row, randomly merging adjacent cells within each row,
+/// then carving at least one downward passage per set to propagate
+/// connectivity into the next row.
+///
+/// Designed to be ran on parallel threads without mutable access to the Grid itself
+///
+/// # Arguments
+///
+/// * `chunk` - A mutable slice of [`crate::Maze::Row::Row`]'s to process
+fn process_chunk(chunk: &mut [Row]) {
+    let mut rng = rand::rng();
+    for row in chunk {
+        for cell_index in 1..row.width {
+            if rng.random_bool(0.5) {
+                row.Merge(cell_index, &directions::left);
+            }
+        }
+
+        let mut sets: Vec<Vec<usize>> = vec![vec![]];
+        let mut set: usize = 0;
+        sets.get_mut(set).unwrap().push(0);
+
+        for cell_index in 1..row.width {
+            if row.get_cell(cell_index).walls[0] {
+                sets.push(vec![]);
+                set += 1;
+            }
+            sets.get_mut(set).unwrap().push(cell_index);
+        }
+
+        for working_set in sets {
+            let carves;
+            if working_set.len() < 2 {
+                carves = 1;
+            } else {
+                carves = rng.random_range(1..working_set.len());
+            }
+
+            let mut indexes: Vec<usize> = (0..working_set.len()).collect();
+
+            for i in 0..carves {
+                let j = rng.random_range(i..indexes.len());
+                indexes.swap(i, j);
+            }
+
+            let carve_points = &indexes[..carves];
+
+            for carve_point in carve_points {
+                row.Merge(*working_set.get(*carve_point).unwrap(), &directions::down);
+            }
+        }
+    }
 }

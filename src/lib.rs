@@ -624,3 +624,153 @@ mod integration_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod concurrency_tests {
+    use crate::Generator::{Ellers, multi_thread_ellers};
+    use crate::Maze::Grid::Grid;
+    use crate::Solver::dijkstra;
+
+    const SIZES: [[usize; 2]; 3] = [[2, 2], [10, 10], [50, 50]];
+
+    fn assert_valid_maze(grid: &Grid) {
+        if grid.width == 0 || grid.height == 0 {
+            return;
+        }
+        for row in grid.row_list.iter() {
+            for cell in row.cell_list.iter() {
+                let pos = cell.position;
+                let has_open_wall = !cell.walls[0]
+                    || !cell.walls[1]
+                    || !cell.walls[2]
+                    || (pos[1] > 0 && !grid.get_cell(&[pos[0], pos[1] - 1]).walls[1]);
+                assert!(
+                    has_open_wall,
+                    "cell [{}, {}] is fully isolated",
+                    pos[0], pos[1]
+                );
+            }
+        }
+    }
+
+    fn assert_wall_symmetry(grid: &Grid) {
+        for y in 0..grid.height {
+            for x in 0..grid.width {
+                let cell = grid.get_cell(&[x, y]);
+                if !cell.walls[2] && x + 1 < grid.width {
+                    assert!(
+                        !grid.get_cell(&[x + 1, y]).walls[0],
+                        "asymmetric wall between [{x},{y}] and [{},{y}]",
+                        x + 1
+                    );
+                }
+                if !cell.walls[0] && x > 0 {
+                    assert!(
+                        !grid.get_cell(&[x - 1, y]).walls[2],
+                        "asymmetric wall between [{x},{y}] and [{},{y}]",
+                        x - 1
+                    );
+                }
+            }
+        }
+    }
+
+    fn is_fully_connected(grid: &Grid) -> bool {
+        if grid.width == 0 || grid.height == 0 {
+            return true;
+        }
+        let mut visited = std::collections::HashSet::new();
+        let mut queue = std::collections::VecDeque::new();
+        queue.push_back([0usize, 0usize]);
+        visited.insert([0usize, 0usize]);
+        while let Some(current) = queue.pop_front() {
+            for neighbour in grid.find_movable_neighbours(&current) {
+                if visited.insert(neighbour) {
+                    queue.push_back(neighbour);
+                }
+            }
+        }
+        visited.len() == grid.width * grid.height
+    }
+
+    #[test]
+    fn multi_thread_ellers_empty_grid() {
+        let grid = multi_thread_ellers(Grid::new(0, 0));
+        assert_eq!(grid.width, 0);
+        assert_eq!(grid.height, 0);
+    }
+
+    #[test]
+    fn multi_thread_ellers_single_cell() {
+        let grid = multi_thread_ellers(Grid::new(1, 1));
+        assert_eq!(grid.width, 1);
+        assert_eq!(grid.height, 1);
+    }
+
+    #[test]
+    fn multi_thread_ellers_preserves_dimensions() {
+        let grid = multi_thread_ellers(Grid::new(10, 15));
+        assert_eq!(grid.width, 10);
+        assert_eq!(grid.height, 15);
+    }
+
+    #[test]
+    fn multi_thread_ellers_produces_valid_maze() {
+        let grid = multi_thread_ellers(Grid::new(20, 20));
+        assert_valid_maze(&grid);
+    }
+
+    #[test]
+    fn multi_thread_ellers_wall_symmetry() {
+        let grid = multi_thread_ellers(Grid::new(20, 20));
+        assert_wall_symmetry(&grid);
+    }
+
+    #[test]
+    fn multi_thread_ellers_single_row() {
+        let grid = multi_thread_ellers(Grid::new(10, 1));
+        assert_valid_maze(&grid);
+    }
+
+    #[test]
+    fn multi_thread_ellers_single_column() {
+        let grid = multi_thread_ellers(Grid::new(1, 10));
+        assert_valid_maze(&grid);
+    }
+
+    #[test]
+    fn multi_thread_ellers_is_fully_connected() {
+        for size in SIZES {
+            let grid = multi_thread_ellers(Grid::new(size[0], size[1]));
+            assert!(
+                is_fully_connected(&grid),
+                "multi_thread_ellers {}x{} maze is not fully connected",
+                size[0],
+                size[1]
+            );
+        }
+    }
+
+    #[test]
+    fn multi_thread_ellers_generate_solve_dijkstra() {
+        for size in SIZES {
+            let grid = multi_thread_ellers(Grid::new(size[0], size[1]));
+            let path = dijkstra([0, 0], [size[0] - 1, size[1] - 1], &grid);
+            assert!(!path.is_empty());
+            assert_eq!(path[0], [0, 0]);
+            assert_eq!(*path.last().unwrap(), [size[0] - 1, size[1] - 1]);
+        }
+    }
+
+    #[test]
+    fn multi_thread_ellers_matches_single_thread_validity() {
+        for size in SIZES {
+            let single = Ellers(Grid::new(size[0], size[1]));
+            let multi = multi_thread_ellers(Grid::new(size[0], size[1]));
+            assert_eq!(single.width, multi.width);
+            assert_eq!(single.height, multi.height);
+            assert!(is_fully_connected(&multi));
+            assert_valid_maze(&multi);
+        }
+    }
+}

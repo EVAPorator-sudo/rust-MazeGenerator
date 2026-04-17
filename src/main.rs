@@ -46,12 +46,15 @@ fn main() {
 
 fn select_algorithm() -> String {
     loop {
-        println!("Welcome to MazeGenerator!\nChoose algorithm:\n1. Ellers\n2. Growing Tree");
+        println!(
+            "Welcome to MazeGenerator!\nChoose algorithm:\n1. Ellers\n2. Growing Tree\n3. Ellers (multithreaded)"
+        );
         let input = read_input();
         match input.trim() {
             "1" => return "--e".to_string(),
             "2" => return "--g".to_string(),
-            _ => println!("Invalid input, please enter 1 or 2."),
+            "3" => return "--em".to_string(),
+            _ => println!("Invalid input, please enter 1, 2 or 3."),
         }
     }
 }
@@ -148,6 +151,9 @@ fn handle(args: Vec<String>) {
 
     let chars: Vec<char> = args[1].chars().collect();
 
+    let is_multithreaded = chars.get(3) == Some(&'m');
+    let solve_char_index = if is_multithreaded { 4 } else { 3 };
+
     let coord_starting;
 
     let img_extensions = [
@@ -175,12 +181,16 @@ fn handle(args: Vec<String>) {
         }
         'e' => {
             coord_starting = 4;
-            Ellers(Grid::new(width, height))
+            if is_multithreaded {
+                multi_thread_ellers(Grid::new(width, height))
+            } else {
+                Ellers(Grid::new(width, height))
+            }
         }
         _ => panic!("invalid algorithm"),
     };
 
-    if chars.len() > 3 {
+    if chars.len() > solve_char_index {
         let start: [usize; 2] = [
             args[coord_starting]
                 .parse()
@@ -199,11 +209,12 @@ fn handle(args: Vec<String>) {
                 .expect("Please enter a valid y coordinate in the maze"),
         ];
 
-        let solution = match chars[3] {
+        let solution = match chars[solve_char_index] {
             'd' => dijkstra(start, end, &grid),
             'a' => Astar(start, end, &grid),
             _ => panic!("invalid algorithm"),
         };
+
         if path.ends_with(".svg") {
             fs::write(path, solve_draw_svg(&grid, &solution)).expect("Error writing maze to disk");
         } else {
@@ -247,3 +258,4 @@ fn validate_dimensions(width: usize, height: usize, extension: &str) {
         panic!("Dimensions exceed file extension limits");
     }
 }
+
