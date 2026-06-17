@@ -10,7 +10,6 @@ homepage = "https://github.com/EVAPorator-sudo/rust-MazeGenerator"
 
 [dependencies]
 rand = "0.10.0"
-resvg = "0.47.0"
 image = "0.25.10"
 num_cpus = "1.17.0"
 
