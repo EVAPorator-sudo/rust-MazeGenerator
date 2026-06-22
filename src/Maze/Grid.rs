@@ -251,4 +251,24 @@ impl Grid {
         }
         neighbours
     }
+
+    pub fn find_by_direction(&self, coords: [usize; 2], direction: &directions) -> &Cell{
+        match direction {
+            left => {
+                self.get_cell(&[coords[0] - 1, coords[1]])
+            }
+
+            right => {
+                self.get_cell(&[coords[0] + 1, coords[1]])
+            }
+
+            down => {
+                self.get_cell(&coords)
+            }
+
+            up => {
+                self.get_cell(&[coords[0], coords[1] - 1])
+            }
+        }
+    }
 }
