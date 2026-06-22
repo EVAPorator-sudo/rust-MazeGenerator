@@ -46,7 +46,7 @@ pub fn dijkstra(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 
     let mut previous: HashMap<[usize; 2], [usize; 2]> = HashMap::new();
     let mut queue: BinaryHeap<Reverse<(i32, [usize; 2])>> = BinaryHeap::new();
 
-    for pos in grid.get_all_cells() {
+    for pos in grid.get_all_cell_positions() {
         g_score.insert(pos, i32::MAX);
     }
 
@@ -141,7 +141,7 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
     let mut previous: HashMap<[usize; 2], [usize; 2]> = HashMap::new();
     let mut queue: BinaryHeap<Reverse<(i32, [usize; 2])>> = BinaryHeap::new();
 
-    for pos in grid.get_all_cells() {
+    for pos in grid.get_all_cell_positions() {
         g_score.insert(pos, i32::MAX);
         f_score.insert(pos, i32::MAX);
     }
@@ -189,4 +189,3 @@ pub fn Astar(start: [usize; 2], end: [usize; 2], grid: &Grid) -> Vec<[usize; 2]>
 
     path
 }
-

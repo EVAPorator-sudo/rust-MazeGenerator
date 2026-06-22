@@ -164,19 +164,19 @@ mod grid_tests {
     #[test]
     fn get_all_cells_correct_count() {
         let grid = Grid::new(5, 10);
-        assert_eq!(grid.get_all_cells().len(), 50);
+        assert_eq!(grid.get_all_cell_positions().len(), 50);
     }
 
     #[test]
     fn get_all_cells_empty_grid() {
         let grid = Grid::new(0, 0);
-        assert_eq!(grid.get_all_cells().len(), 0);
+        assert_eq!(grid.get_all_cell_positions().len(), 0);
     }
 
     #[test]
     fn get_all_cells_contains_all_positions() {
         let grid = Grid::new(3, 3);
-        let cells = grid.get_all_cells();
+        let cells = grid.get_all_cell_positions();
         for y in 0..3 {
             for x in 0..3 {
                 assert!(cells.contains(&[x, y]), "missing cell [{x}, {y}]");

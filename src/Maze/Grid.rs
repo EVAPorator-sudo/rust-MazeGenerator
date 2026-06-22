@@ -156,7 +156,7 @@ impl Grid {
     ///
     /// A `Vec<[usize; 2]>` containing the coordinates of every [`Cell`] in the grid,
     /// ordered by each [`Row`]s y index ascending.
-    pub fn get_all_cells(&self) -> Vec<[usize; 2]> {
+    pub fn get_all_cell_positions(&self) -> Vec<[usize; 2]> {
         let mut cells = Vec::with_capacity(self.width * self.height);
 
         for row in self.row_list.iter() {
@@ -165,6 +165,17 @@ impl Grid {
             }
         }
 
+        cells
+    }
+
+    pub fn get_all_cells(&self) -> Vec<&Cell> {
+        let mut cells = Vec::with_capacity(self.width * self.height);
+
+        for row in self.row_list.iter() {
+            for cell in row.cell_list.iter() {
+                cells.push(cell);
+            }
+        }
         cells
     }
 
