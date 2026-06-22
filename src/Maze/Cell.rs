@@ -6,6 +6,7 @@
 /// Walls are shared between adjacent cells — see [`crate::Maze::Grid::Grid::Merge`]
 /// for how wall removal is handled on both sides of a boundary.
 /// Walls are represented as a ['boolean; 3'] in the format ['left, down, right'].
+#[derive(Eq, Hash, PartialEq)]
 pub struct Cell {
     /// The `[x, y]` position of this cell within the [`crate::Maze::Grid::Grid`].
     pub position: [usize; 2],
