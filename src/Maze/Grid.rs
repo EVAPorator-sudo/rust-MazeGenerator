@@ -271,4 +271,28 @@ impl Grid {
             }
         }
     }
+
+    pub fn valid_directions(&self, coords: [usize; 2]) -> Vec<directions> {
+        let mut dirs = vec![];
+
+        if coords[0] == 0 {
+            dirs.push(right);
+        } else if coords[0] == self.width -1 {
+            dirs.push(left);
+        } else {
+            dirs.push(left);
+            dirs.push(right);
+        }
+
+        if coords[1] == 0 {
+            dirs.push(down);
+        } else if coords[1] == self.height -1 {
+            dirs.push(up);
+        } else {
+            dirs.push(down);
+            dirs.push(up);
+        }
+
+        dirs
+    }
 }
