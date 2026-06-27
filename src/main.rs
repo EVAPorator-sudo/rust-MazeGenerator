@@ -47,14 +47,15 @@ fn main() {
 fn select_algorithm() -> String {
     loop {
         println!(
-            "Welcome to MazeGenerator!\nChoose algorithm:\n1. Ellers\n2. Growing Tree\n3. Ellers (multithreaded)"
+            "Welcome to MazeGenerator!\nChoose algorithm:\n1. Ellers\n2. Growing Tree\n3. Ellers (multithreaded)\n4. Kruskals"
         );
         let input = read_input();
         match input.trim() {
             "1" => return "--e".to_string(),
             "2" => return "--g".to_string(),
             "3" => return "--em".to_string(),
-            _ => println!("Invalid input, please enter 1, 2 or 3."),
+            "4" => return "--k".to_string(),
+            _ => println!("Invalid input, please enter 1, 2, 3 or 4."),
         }
     }
 }
@@ -187,6 +188,10 @@ fn handle(args: Vec<String>) {
                 Ellers(Grid::new(width, height))
             }
         }
+        'k' => {
+            coord_starting = 4;
+            Kruskal(Grid::new(width, height))
+        }
         _ => panic!("invalid algorithm"),
     };
 
@@ -258,4 +263,3 @@ fn validate_dimensions(width: usize, height: usize, extension: &str) {
         panic!("Dimensions exceed file extension limits");
     }
 }
-

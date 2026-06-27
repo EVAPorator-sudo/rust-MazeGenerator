@@ -6,11 +6,12 @@
 //! - [`Growing_Tree`] — a configurable algorithm that can behave anywhere between
 //!   recursive backtracking and Prim's algorithm depending on the `weighting` parameter
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::thread;
 
 use rand::RngExt;
 
+use crate::Maze::Cell::Cell;
 use crate::Maze::Grid::Grid;
 use crate::Maze::Row::Row;
 use crate::directions;
@@ -41,9 +42,11 @@ use crate::directions::*;
 /// assert_eq!(grid.height, 10);
 /// ```
 pub fn Ellers(mut grid: Grid) -> Grid {
-    if grid.width == 0 || grid.height == 0 {
+
+    if grid.width == 1 || grid.height == 1 {
         return grid;
     }
+
     let mut rng = rand::rng();
 
     for row_index in 0..(grid.height - 1) {
@@ -53,7 +56,7 @@ pub fn Ellers(mut grid: Grid) -> Grid {
             }
         }
 
-        let mut sets: Vec<Vec<[usize; 2]>> = vec![vec![]];
+        let mut sets: Vec<Vec<[usize; 2]>> = vec![vec![]]; //replace sets with hashmap
         let mut set: usize = 0;
         sets.get_mut(set).unwrap().push([0, row_index]);
 
@@ -261,7 +264,7 @@ fn process_chunk(chunk: &mut [Row]) {
             }
         }
 
-        let mut sets: Vec<Vec<usize>> = vec![vec![]];
+        let mut sets: Vec<Vec<usize>> = vec![vec![]]; // replace sets with HashMap
         let mut set: usize = 0;
         sets.get_mut(set).unwrap().push(0);
 
@@ -295,4 +298,57 @@ fn process_chunk(chunk: &mut [Row]) {
             }
         }
     }
+}
+
+
+pub fn Kruskal(mut grid: Grid) -> Grid{
+
+    if grid.width == 0 || grid.height == 0 {
+        return grid;
+    }
+
+    let mut rng = rand::rng();
+
+    let mut walls: Vec<([usize;2], directions)> = Vec::with_capacity(grid.width * grid.height * 3);
+
+    for cell in grid.get_all_cells() {
+        for direction in grid.valid_directions(cell.position) {
+            walls.push((cell.position, direction));
+        }
+    }
+
+    let mut setcounter: usize = 0;
+    let mut sets: HashMap<[usize; 2], usize> = HashMap::with_capacity(grid.height * grid.width);
+
+    for pos in grid.get_all_cells().iter().map(|x| x.position) {
+        sets.insert(pos, setcounter);
+        setcounter += 1
+    }
+
+    for i in (1..(walls.len() -1)).rev() {
+        let k = rng.random_range(0..i);
+        walls.swap(i, k);
+    }
+
+    for (pos, direction) in walls {
+        let neighbour = grid.find_by_direction(pos, &direction).position;
+        if sets.get(&pos).unwrap() != sets.get(&neighbour).unwrap() {
+            grid.Merge(pos, &direction);
+
+            let old_id = *sets.get(&neighbour).unwrap();
+            let new_id = *sets.get(&pos).unwrap();
+
+            for set in sets.values_mut() {
+                if *set == old_id {
+                    *set = new_id;
+                }
+            }
+
+            sets.remove(&neighbour);
+            sets.insert(neighbour, *sets.get(&pos).unwrap());
+        }
+    }
+
+
+    grid
 }
