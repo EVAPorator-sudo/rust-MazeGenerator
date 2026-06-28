@@ -43,7 +43,7 @@ use crate::directions::*;
 /// ```
 pub fn Ellers(mut grid: Grid) -> Grid {
 
-    if grid.width == 1 || grid.height == 1 {
+    if grid.width == 0 || grid.height == 0 {
         return grid;
     }
 
@@ -305,6 +305,8 @@ pub fn Kruskal(mut grid: Grid) -> Grid{
 
     if grid.width == 0 || grid.height == 0 {
         return grid;
+    } else if grid.width == 1 && grid.height == 1 { //fix logic to replace this
+        return grid
     }
 
     let mut rng = rand::rng();

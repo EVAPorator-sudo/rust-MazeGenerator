@@ -256,7 +256,7 @@ mod grid_tests {
 
 #[cfg(test)]
 mod generator_tests {
-    use crate::Generator::{Ellers, Growing_Tree};
+    use crate::Generator::{Ellers, Growing_Tree, Kruskal};
     use crate::Maze::Grid::Grid;
 
     fn assert_valid_maze(grid: &Grid) {
@@ -385,6 +385,34 @@ mod generator_tests {
         assert_valid_maze(&grid);
         assert_wall_symmetry(&grid);
     }
+
+    #[test]
+    fn kruskal_empty_grid() {
+        let grid = Kruskal(Grid::new(0, 0));
+        assert_eq!(grid.width, 0);
+        assert_eq!(grid.height, 0);
+    }
+
+    #[test]
+    fn kruskal_single_cell() {
+        let grid = Kruskal(Grid::new(1, 1));
+        assert_eq!(grid.width, 1);
+        assert_eq!(grid.height, 1);
+    }
+
+    #[test]
+    fn kruskal_preserves_dimensions() {
+        let grid = Kruskal(Grid::new(10, 15));
+        assert_eq!(grid.width, 10);
+        assert_eq!(grid.height, 15);
+    }
+
+    #[test]
+    fn kruskal_produces_valid_maze() {
+        let grid = Kruskal(Grid::new(20, 20));
+        assert_valid_maze(&grid);
+    }
+
 }
 
 #[cfg(test)]
