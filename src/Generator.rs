@@ -11,7 +11,6 @@ use std::thread;
 
 use rand::RngExt;
 
-use crate::Maze::Cell::Cell;
 use crate::Maze::Grid::Grid;
 use crate::Maze::Row::Row;
 use crate::directions;
@@ -300,7 +299,28 @@ fn process_chunk(chunk: &mut [Row]) {
     }
 }
 
-
+/// Generates a maze using kruskal's algorithm.
+///
+/// Works by randomly merging each set of cells until one unified path is created/
+///
+/// # Arguments
+///
+/// * `grid` - A [`crate::Maze::Grid::Grid`] to generate the maze onto
+///
+/// # Returns
+///
+/// The same [`crate::Maze::Grid::Grid`] containing a maze.
+///
+/// # Examples
+///
+/// ```
+/// use MazeGenerator::Generator::Kruskal;
+/// use MazeGenerator::Maze::Grid::Grid;
+///
+/// let grid = Kruskal(Grid::new(10, 10));
+/// assert_eq!(grid.width, 10);
+/// assert_eq!(grid.height, 10);
+/// ```
 pub fn Kruskal(mut grid: Grid) -> Grid{
 
     if grid.width == 0 || grid.height == 0 {
