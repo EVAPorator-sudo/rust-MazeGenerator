@@ -47,6 +47,7 @@ pub mod Draw;
 pub mod Generator;
 pub mod Maze;
 pub mod Solver;
+pub mod structures;
 pub enum directions {
     left,
     right,
